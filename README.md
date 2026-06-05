@@ -15,7 +15,7 @@ An intelligent Firefox extension that automatically detects and fills form field
 
 ### 1. Setup Firebase (Required)
 
-See `FIREBASE_SETUP.md` for detailed instructions.
+See `docs/FIREBASE_SETUP.md` for detailed instructions.
 
 Quick steps:
 1. Create Firebase project: https://console.firebase.google.com/
@@ -31,7 +31,7 @@ Quick steps:
 
 ### 3. (Optional) Generate Icons
 
-See `SETUP.md` for icon generation instructions.
+See `docs/SETUP.md` for icon generation instructions.
 
 ## Usage
 
