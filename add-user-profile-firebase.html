@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add User Profile - AutoFill Pro (Firebase)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button.secondary {
+            background: #6c757d;
+        }
+
+        button.secondary:hover {
+            background: #5a6268;
+        }
+
+        button.danger {
+            background: #f56565;
+        }
+
+        button.danger:hover {
+            background: #e53e3e;
+        }
+
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+
+        .user-id {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add User Profile</h1>
+        <p class="subtitle">Add or update your profile data in Firebase</p>
+
+        <div class="user-id">
+            <strong>Your User ID:</strong> <span id="userId">Generating...</span>
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <form id="profileForm">
+            <div class="section">
+                <h2>Personal Information</h2>
+                <div class="form-group">
+                    <label for="fullName">Full Name (as per ID proof)</label>
+                    <input type="text" id="fullName" placeholder="Tanish Vashisth">
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" placeholder="Tanish">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" placeholder="Vashisth">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="dob">Date of Birth</label>
+                        <input type="date" id="dob">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender">
+                            <option value="">Select...</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="category">Category/Caste</label>
+                        <select id="category">
+                            <option value="">Select...</option>
+                            <option value="general">General</option>
+                            <option value="obc">OBC</option>
+                            <option value="sc">SC</option>
+                            <option value="st">ST</option>
+                            <option value="ews">EWS</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nationality">Nationality</label>
+                        <input type="text" id="nationality" placeholder="Indian">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="fatherName">Father's/Husband's Name</label>
+                        <input type="text" id="fatherName" placeholder="Father's Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="motherName">Mother's Name</label>
+                        <input type="text" id="motherName" placeholder="Mother's Name">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Contact Details</h2>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="tanishvashisth@gmail.com">
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" placeholder="9911584966">
+                    </div>
+                    <div class="form-group">
+                        <label for="alternatePhone">Alternate Phone</label>
+                        <input type="tel" id="alternatePhone" placeholder="+91 98765 43210">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Address</h2>
+                <div class="form-group">
+                    <label for="address">Permanent Address</label>
+                    <input type="text" id="address" placeholder="123 Main Street">
+                </div>
+                <div class="form-group">
+                    <label for="address2">Current Address (if different)</label>
+                    <input type="text" id="address2" placeholder="Apt 4B, Suite 100">
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" placeholder="Delhi">
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State/District</label>
+                        <input type="text" id="state" placeholder="Delhi">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="zipCode">PIN Code</label>
+                        <input type="text" id="zipCode" placeholder="110001">
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <input type="text" id="country" placeholder="India">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Educational Qualifications</h2>
+                <div class="form-group">
+                    <label for="degree">Degree/Certificate</label>
+                    <input type="text" id="degree" placeholder="B.Tech, B.Com, B.Sc, etc.">
+                </div>
+                <div class="form-group">
+                    <label for="institution">Institution/University Name</label>
+                    <input type="text" id="institution" placeholder="University Name">
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="yearOfPassing">Year of Passing</label>
+                        <input type="text" id="yearOfPassing" placeholder="2023">
+                    </div>
+                    <div class="form-group">
+                        <label for="percentageCgpa">Percentage/CGPA</label>
+                        <input type="text" id="percentageCgpa" placeholder="85.5% or 8.5 CGPA">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="boardUniversity">Board/University</label>
+                    <input type="text" id="boardUniversity" placeholder="CBSE, ICSE, State Board, etc.">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Exam-Specific Details</h2>
+                <div class="form-group">
+                    <label for="preferredCenter">Preferred Exam Center</label>
+                    <input type="text" id="preferredCenter" placeholder="Delhi, Mumbai, etc.">
+                </div>
+                <div class="form-group">
+                    <label for="subjectPreference">Subject/Paper Preference</label>
+                    <input type="text" id="subjectPreference" placeholder="Mathematics, Physics, etc.">
+                </div>
+                <div class="form-group">
+                    <label for="languagePreference">Language Preference</label>
+                    <select id="languagePreference">
+                        <option value="">Select...</option>
+                        <option value="english">English</option>
+                        <option value="hindi">Hindi</option>
+                        <option value="regional">Regional Language</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Identity Documents</h2>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="idProofType">ID Proof Type</label>
+                        <select id="idProofType">
+                            <option value="">Select...</option>
+                            <option value="aadhaar">Aadhaar Card</option>
+                            <option value="pan">PAN Card</option>
+                            <option value="voter">Voter ID</option>
+                            <option value="passport">Passport</option>
+                            <option value="driving">Driving License</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="idNumber">ID Number</label>
+                        <input type="text" id="idNumber" placeholder="1234 5678 9012">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Other Details</h2>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="disabilityStatus">Disability Status</label>
+                        <select id="disabilityStatus">
+                            <option value="">Select...</option>
+                            <option value="none">None</option>
+                            <option value="yes">Yes (Person with Disability)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="workExperience">Work Experience (if required)</label>
+                        <input type="text" id="workExperience" placeholder="5 years in IT">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit">Save Profile to Firebase</button>
+            <button type="button" class="secondary" onclick="loadCurrentData()">Load Current Profile</button>
+            <button type="button" class="danger" onclick="clearProfile()">Clear Profile</button>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "",
+            authDomain: "",
+            projectId: "",
+            storageBucket: "",
+            messagingSenderId: "",
+            appId: ""
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let userId = localStorage.getItem('autofill_user_id');
+        if (!userId) {
+            userId = crypto.randomUUID();
+            localStorage.setItem('autofill_user_id', userId);
+        }
+        document.getElementById('userId').textContent = userId;
+
+        async function saveProfile(e) {
+            e.preventDefault();
+            console.log('💾 [SAVE] Starting to save profile...');
+
+            const data = {
+                userId: userId,
+                fullName: document.getElementById('fullName').value || null,
+                firstName: document.getElementById('firstName').value || null,
+                lastName: document.getElementById('lastName').value || null,
+                dob: document.getElementById('dob').value || null,
+                gender: document.getElementById('gender').value || null,
+                category: document.getElementById('category').value || null,
+                nationality: document.getElementById('nationality').value || null,
+                fatherName: document.getElementById('fatherName').value || null,
+                motherName: document.getElementById('motherName').value || null,
+                email: document.getElementById('email').value || null,
+                phone: document.getElementById('phone').value || null,
+                alternatePhone: document.getElementById('alternatePhone').value || null,
+                address: document.getElementById('address').value || null,
+                address2: document.getElementById('address2').value || null,
+                city: document.getElementById('city').value || null,
+                state: document.getElementById('state').value || null,
+                zipCode: document.getElementById('zipCode').value || null,
+                country: document.getElementById('country').value || null,
+                degree: document.getElementById('degree').value || null,
+                institution: document.getElementById('institution').value || null,
+                yearOfPassing: document.getElementById('yearOfPassing').value || null,
+                percentageCgpa: document.getElementById('percentageCgpa').value || null,
+                boardUniversity: document.getElementById('boardUniversity').value || null,
+                preferredCenter: document.getElementById('preferredCenter').value || null,
+                subjectPreference: document.getElementById('subjectPreference').value || null,
+                languagePreference: document.getElementById('languagePreference').value || null,
+                idProofType: document.getElementById('idProofType').value || null,
+                idNumber: document.getElementById('idNumber').value || null,
+                disabilityStatus: document.getElementById('disabilityStatus').value || null,
+                workExperience: document.getElementById('workExperience').value || null,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            console.log('💾 [SAVE] User ID:', userId);
+            console.log('💾 [SAVE] Data to save:', data);
+
+            showStatus('Saving profile...', 'info');
+
+            try {
+                console.log('💾 [SAVE] Saving to Firebase collection: userProfiles');
+                await db.collection('userProfiles').doc(userId).set(data, { merge: true });
+                console.log('✅ [SAVE] Profile saved successfully!');
+                showStatus('✅ Profile saved successfully to Firebase!', 'success');
+            } catch (error) {
+                console.error('❌ [SAVE] Error saving profile:', error);
+                console.error('❌ [SAVE] Error details:', error.message);
+                showStatus('❌ Error saving profile: ' + error.message, 'error');
+            }
+        }
+
+        async function loadCurrentData() {
+            console.log('🔍 [LOAD] Starting to load user profile...');
+            console.log('🔍 [LOAD] Current User ID:', userId);
+            showStatus('Loading current profile...', 'info');
+
+            try {
+                let data = null;
+                let foundDoc = null;
+
+                console.log('🔍 [LOAD] Checking Firebase for User ID:', userId);
+                const doc = await db.collection('userProfiles').doc(userId).get();
+
+                if (doc.exists) {
+                    console.log('✅ [LOAD] Found profile by User ID!');
+                    data = doc.data();
+                    foundDoc = doc;
+                    console.log('📋 [LOAD] Data:', data);
+                } else {
+                    console.log('⚠️ [LOAD] No profile found for User ID. Searching by phone...');
+                    const querySnapshot = await db.collection('userProfiles')
+                        .where('phone', '==', '9911584966')
+                        .limit(1)
+                        .get();
+
+                    console.log('🔍 [LOAD] Phone search results:', querySnapshot.size, 'documents found');
+
+                    if (!querySnapshot.empty) {
+                        foundDoc = querySnapshot.docs[0];
+                        data = foundDoc.data();
+                        userId = foundDoc.id;
+                        localStorage.setItem('autofill_user_id', userId);
+                        document.getElementById('userId').textContent = userId;
+                        console.log('✅ [LOAD] Found profile by phone! New User ID:', userId);
+                        console.log('📋 [LOAD] Data:', data);
+                    } else {
+                        console.log('❌ [LOAD] No profile found by phone either');
+                    }
+                }
+
+                if (!data) {
+                    console.log('❌ [LOAD] No data found. User needs to fill the form.');
+                    showStatus('No existing profile found. Please fill in the form.', 'info');
+                    return;
+                }
+                document.getElementById('fullName').value = data.fullName || '';
+                document.getElementById('firstName').value = data.firstName || '';
+                document.getElementById('lastName').value = data.lastName || '';
+                document.getElementById('dob').value = data.dob || '';
+                document.getElementById('gender').value = data.gender || '';
+                document.getElementById('category').value = data.category || '';
+                document.getElementById('nationality').value = data.nationality || '';
+                document.getElementById('fatherName').value = data.fatherName || '';
+                document.getElementById('motherName').value = data.motherName || '';
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('phone').value = data.phone || '';
+                document.getElementById('alternatePhone').value = data.alternatePhone || '';
+                document.getElementById('address').value = data.address || '';
+                document.getElementById('address2').value = data.address2 || '';
+                document.getElementById('city').value = data.city || '';
+                document.getElementById('state').value = data.state || '';
+                document.getElementById('zipCode').value = data.zipCode || '';
+                document.getElementById('country').value = data.country || '';
+                document.getElementById('degree').value = data.degree || '';
+                document.getElementById('institution').value = data.institution || '';
+                document.getElementById('yearOfPassing').value = data.yearOfPassing || '';
+                document.getElementById('percentageCgpa').value = data.percentageCgpa || '';
+                document.getElementById('boardUniversity').value = data.boardUniversity || '';
+                document.getElementById('preferredCenter').value = data.preferredCenter || '';
+                document.getElementById('subjectPreference').value = data.subjectPreference || '';
+                document.getElementById('languagePreference').value = data.languagePreference || '';
+                document.getElementById('idProofType').value = data.idProofType || '';
+                document.getElementById('idNumber').value = data.idNumber || '';
+                document.getElementById('disabilityStatus').value = data.disabilityStatus || '';
+                document.getElementById('workExperience').value = data.workExperience || '';
+
+                showStatus('✅ Profile loaded successfully!', 'success');
+            } catch (error) {
+                showStatus('❌ Error loading profile: ' + error.message, 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        async function clearProfile() {
+            if (!confirm('Are you sure you want to delete your profile from Firebase?')) {
+                return;
+            }
+
+            showStatus('Deleting profile...', 'info');
+
+            try {
+                await db.collection('userProfiles').doc(userId).delete();
+                document.getElementById('profileForm').reset();
+                showStatus('✅ Profile deleted successfully!', 'success');
+            } catch (error) {
+                showStatus('❌ Error deleting profile: ' + error.message, 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = 'status ' + type;
+
+            setTimeout(() => {
+                statusEl.textContent = '';
+                statusEl.className = 'status';
+            }, 5000);
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', saveProfile);
+        window.onload = function() {
+            loadCurrentData();
+        };
+    </script>
+</body>
+</html>

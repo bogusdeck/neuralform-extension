@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuralForm</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>NeuralForm</h1>
+            <p class="subtitle">Quick form filling for government exams</p>
+        </header>
+
+        <div class="actions">
+            <button id="fillBtn" class="btn btn-success">Fill the Form</button>
+            <button id="aiFillBtn" class="btn btn-ai">AI Fill (Ollama)</button>
+            <button id="addDetailsBtn" class="btn btn-primary">Add Details</button>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <div id="reviewLayer" class="review-layer" style="display: none;">
+            <h3>Review AI Suggestions</h3>
+            <div id="reviewFields" class="review-fields"></div>
+            <div class="review-actions">
+                <button id="cancelReviewBtn" class="btn btn-danger">Cancel</button>
+                <button id="confirmReviewBtn" class="btn btn-success">Fill Form</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="../config/firebase.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>

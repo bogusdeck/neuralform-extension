@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to NeuralForm - Onboarding</title>
+    <link rel="stylesheet" href="popup/popup.css">
+    <style>
+        body { padding: 40px; display: flex; justify-content: center; align-items: center; }
+        .onboarding-card { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        .step { display: none; }
+        .step.active { display: block; }
+        .progress-bar { 
+            height: 4px; 
+            background: #edf2f7; 
+            margin-bottom: 30px; 
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .progress-fill { 
+            height: 100%; 
+            background: #667eea; 
+            width: 33%; 
+            transition: width 0.3s;
+        }
+        .cv-dropzone {
+            border: 2px dashed #cbd5e0;
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .cv-dropzone:hover { border-color: #667eea; background: #f7fafc; }
+    </style>
+</head>
+<body>
+    <div class="onboarding-card">
+        <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+        
+        <!-- Step 1: Welcome -->
+        <div id="step1" class="step active">
+            <h1>Welcome to NeuralForm!</h1>
+            <p>Let's get your profile set up to make form filling a breeze.</p>
+            <div style="margin-top: 30px;">
+                <button onclick="nextStep(2)" class="btn btn-primary">Get Started</button>
+            </div>
+        </div>
+
+        <!-- Step 2: CV Upload -->
+        <div id="step2" class="step">
+            <h1>Upload your CV</h1>
+            <p>We'll use AI to parse your details automatically.</p>
+            <div class="cv-dropzone" id="dropzone">
+                <p>Drag & Drop your CV (PDF/Doc) or click to upload</p>
+                <input type="file" id="cvFile" style="display: none;">
+            </div>
+            <div id="parseStatus" style="margin-bottom: 15px; font-size: 14px;"></div>
+            <button onclick="nextStep(3)" class="btn btn-primary">Skip / Enter Manually</button>
+        </div>
+
+        <!-- Step 3: Verify & Save -->
+        <div id="step3" class="step">
+            <h1>Complete Profile</h1>
+            <p>Verify the detected information and fill the rest.</p>
+            <div id="onboardingForm" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
+                <!-- Form fields will be injected here -->
+            </div>
+            <button id="saveProfileBtn" class="btn btn-success">Finish & Save</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="config/firebase.js"></script>
+    <script>
+        let currentStep = 1;
+        function nextStep(step) {
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            document.getElementById(`step${step}`).classList.add('active');
+            currentStep = step;
+            document.getElementById('progressFill').style.width = (step * 33) + '%';
+        }
+
+        // CV Dropzone Logic
+        const dropzone = document.getElementById('dropzone');
+        dropzone.onclick = () => document.getElementById('cvFile').click();
+        
+        document.getElementById('cvFile').onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('parseStatus').innerHTML = '⏳ Parsing your CV with AI...';
+            
+            // Mock parsing with AI
+            setTimeout(() => {
+                document.getElementById('parseStatus').innerHTML = '✅ CV Parsed successfully!';
+                // In real implementation, send file to backend/AI
+                nextStep(3);
+                injectFields({
+                    firstName: "John",
+                    lastName: "Doe",
+                    email: "john@example.com",
+                    degree: "Bachelor of Technology"
+                });
+            }, 2000);
+        };
+
+        function injectFields(data) {
+            const container = document.getElementById('onboardingForm');
+            container.innerHTML = '';
+            const fields = ['firstName', 'lastName', 'email', 'phone', 'degree', 'institution'];
+            fields.forEach(f => {
+                container.innerHTML += `
+                    <div class="form-group">
+                        <label>${f}</label>
+                        <input type="text" id="ob_${f}" value="${data[f] || ''}">
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('saveProfileBtn').onclick = async () => {
+            const data = {};
+            document.querySelectorAll('#onboardingForm input').forEach(input => {
+                data[input.id.replace('ob_', '')] = input.value;
+            });
+            
+            try {
+                await saveUserData(data);
+                browser.storage.local.set({ onboardingComplete: true });
+                window.location.href = 'test-form.html'; // Redirect to test
+            } catch (e) {
+                alert('Error saving data: ' + e.message);
+            }
+        };
+    </script>
+</body>
+</html>

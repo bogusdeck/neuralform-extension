@@ -1,0 +1,103 @@
+# ⚡ Quick Supabase Setup (3 Steps)
+
+Your Supabase credentials are already configured! Just complete these final steps:
+
+---
+
+## Step 1: Get Your Anon Key (2 minutes)
+
+1. Open: https://app.supabase.com/project/htekvelkwfqgfrtpiivp/settings/api
+2. Find **Project API keys** section
+3. Copy the `anon` `public` key (looks like: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`)
+
+---
+
+## Step 2: Update Config (30 seconds)
+
+Open `config/supabase.js` and replace line 2:
+
+**From:**
+```javascript
+const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_PLACEHOLDER';
+```
+
+**To:**
+```javascript
+const SUPABASE_ANON_KEY = 'eyJhbGci...[your actual key]';
+```
+
+---
+
+## Step 3: Create Database (1 minute)
+
+1. Open: https://app.supabase.com/project/htekvelkwfqgfrtpiivp/editor
+2. Click **SQL Editor** in left sidebar
+3. Click **New Query**
+4. Copy all contents from `database/setup.sql`
+5. Paste and click **Run**
+
+You should see success messages! ✅
+
+---
+
+## Step 4: Test (30 seconds)
+
+1. Reload extension in Firefox: `about:debugging`
+2. Click extension icon
+3. Fill in some data
+4. Click **Save Details**
+5. Look for: **"Data saved to cloud successfully! ☁️"**
+
+---
+
+## Verify It Worked
+
+Check Supabase:
+1. Open: https://app.supabase.com/project/htekvelkwfqgfrtpiivp/editor
+2. Click **Table Editor**
+3. Click `user_profiles` table
+4. Your data should be there! 🎉
+
+---
+
+## 🐛 Quick Troubleshooting
+
+**Problem:** "Data saved locally (cloud sync failed)"
+
+**Solutions:**
+1. Did you update the anon key in `config/supabase.js`?
+2. Did you run the SQL setup script?
+3. Check browser console (F12) for errors
+
+---
+
+## 🎯 What's New
+
+### Before (Local Storage Only)
+```
+Extension → Browser Storage (local only)
+```
+
+### Now (Cloud + Local)
+```
+Extension → Supabase Cloud ☁️
+     ↓ (fallback)
+Browser Storage (backup)
+```
+
+---
+
+## 📊 Your Credentials
+
+```
+Database URL: htekvelkwfqgfrtpiivp.supabase.co
+Database Password: usxqqnxjggTv (already configured)
+Project URL: https://htekvelkwfqgfrtpiivp.supabase.co
+Anon Key: [Get from dashboard - Step 1 above]
+```
+
+---
+
+**That's it!** Three steps and you're cloud-enabled! 🚀
+
+Need detailed help? See `SUPABASE_SETUP.md`

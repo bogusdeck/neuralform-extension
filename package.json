@@ -1,0 +1,26 @@
+{
+  "name": "neuralform-extension",
+  "version": "2.0.0",
+  "description": "Firefox extension for auto-filling forms with cloud sync",
+  "scripts": {
+    "build": "web-ext build",
+    "start": "web-ext run --no-reload",
+    "dev": "web-ext run",
+    "lint": "web-ext lint"
+  },
+  "keywords": [
+    "firefox",
+    "extension",
+    "autofill",
+    "forms",
+    "supabase"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "web-ext": "^7.12.0"
+  }
+}

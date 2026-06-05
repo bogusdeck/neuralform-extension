@@ -1,0 +1,8 @@
+node_modules/
+*.log
+.DS_Store
+web-ext-artifacts/
+*.zip
+.web-extension-id
+.env
+.env.local

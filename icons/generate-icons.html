@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Icons</title>
+</head>
+<body>
+    <h2>Icon Generator</h2>
+    <p>Open this file in a browser and it will generate PNG icons from the SVG.</p>
+
+    <canvas id="canvas16" width="16" height="16"></canvas>
+    <canvas id="canvas48" width="48" height="48"></canvas>
+    <canvas id="canvas128" width="128" height="128"></canvas>
+
+    <script>
+        const svgString = `
+            <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="128" height="128" rx="24" fill="url(#gradient)"/>
+                <path d="M32 48h64M32 64h64M32 80h40" stroke="white" stroke-width="6" stroke-linecap="round"/>
+                <circle cx="88" cy="80" r="12" fill="#48bb78"/>
+                <path d="M84 80l3 3 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <defs>
+                    <linearGradient id="gradient" x1="0" y1="0" x2="128" y2="128">
+                        <stop offset="0%" stop-color="#667eea"/>
+                        <stop offset="100%" stop-color="#764ba2"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        `;
+
+        function generateIcon(size, canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, size, size);
+
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `icon${size}.png`;
+                    a.textContent = `Download icon${size}.png`;
+                    a.style.display = 'block';
+                    a.style.marginTop = '10px';
+                    document.body.appendChild(a);
+                });
+            };
+
+            const blob = new Blob([svgString], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            img.src = url;
+        }
+
+        generateIcon(16, 'canvas16');
+        generateIcon(48, 'canvas48');
+        generateIcon(128, 'canvas128');
+    </script>
+</body>
+</html>
