@@ -20,7 +20,7 @@ browser.runtime.onInstalled.addListener(function(details) {
         });
         // Open onboarding page
         browser.tabs.create({
-            url: browser.runtime.getURL('onboarding.html')
+            url: browser.runtime.getURL('onboarding/onboarding.html')
         });
     } else if (details.reason === 'update') {
         console.log('NeuralForm updated to version ' + browser.runtime.getManifest().version);

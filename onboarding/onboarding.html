@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to NeuralForm - Onboarding</title>
-    <link rel="stylesheet" href="popup/popup.css">
+    <link rel="stylesheet" href="../popup/popup.css">
     <style>
         body { padding: 40px; display: flex; justify-content: center; align-items: center; }
         .onboarding-card { 
@@ -79,7 +79,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="config/firebase.js"></script>
+    <script src="../config/firebase.js"></script>
     <script>
         let currentStep = 1;
         function nextStep(step) {
@@ -136,7 +136,7 @@
             try {
                 await saveUserData(data);
                 browser.storage.local.set({ onboardingComplete: true });
-                window.location.href = 'test-form.html'; // Redirect to test
+                window.location.href = '../tools/test-form.html'; // Redirect to test
             } catch (e) {
                 alert('Error saving data: ' + e.message);
             }
