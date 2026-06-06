@@ -2,6 +2,15 @@
 
 An intelligent Firefox extension that automatically detects and fills form fields with your saved personal details using Hybrid AI (Local & Cloud LLMs).
 
+## Recent Evolution
+
+The project has undergone several major updates:
+- **Rebranding**: Transitioned from AutoFill Pro to **NeuralForm**.
+- **AI Integration**: Integrated AI-powered form filling capabilities.
+- **Performance**: Added a high-performance, GSAP-animated landing page in the `website/` directory.
+- **Cleanup**: Removed legacy Supabase files, redundant manifests, and hardcoded secrets for a clean build.
+- **Organization**: Restructured the codebase, moving documentation to `docs/` and adding `scripts/`, `tools/`, and `onboarding/` directories.
+
 ## Features
 
 - 🚀 **Auto-detect form fields** - Intelligently identifies common form fields
@@ -37,7 +46,7 @@ See `docs/SETUP.md` for icon generation instructions.
 
 ### 1. Save Your Details
 
-1. Click the **AutoFill Pro** icon in the Firefox toolbar
+1. Click the **NeuralForm** icon in the Firefox toolbar
 2. Fill in your personal information across three tabs:
    - **Personal**: First name, last name, full name, DOB, gender
    - **Contact**: Email, phone numbers
@@ -47,7 +56,7 @@ See `docs/SETUP.md` for icon generation instructions.
 ### 2. Auto-Fill Forms
 
 1. Navigate to any webpage with a form
-2. Click the **AutoFill Pro** icon
+2. Click the **NeuralForm** icon
 3. Click **Fill Current Page**
 4. The extension will automatically detect and fill matching fields
 5. Filled fields will briefly highlight in green
@@ -77,22 +86,23 @@ The extension intelligently detects fields based on:
 
 ```
 web-extension/
-├── manifest.json              # Extension configuration
+├── background/                 # Background service worker
+│   └── background.js
+├── config/                    # Firebase configuration
+│   └── firebase.js
+├── content/                    # Form detection & filling
+│   └── content.js
+├── docs/                      # Documentation
+├── icons/                     # Extension icons
+├── onboarding/                 # User onboarding flows
 ├── popup/                     # Extension popup UI
 │   ├── popup.html
 │   ├── popup.css
 │   └── popup.js
-├── content/                   # Form detection & filling
-│   └── content.js
-├── background/                # Background service worker
-│   └── background.js
-├── config/                    # Firebase configuration
-│   └── firebase.js
-├── database/                  # Old Supabase files (backup)
-│   └── setup.sql
-├── icons/                     # Extension icons
-├── test-connection.html       # Connection test page
-└── test-form.html             # Test form page
+├── scripts/                   # Build and utility scripts
+├── tools/                     # Development tools
+├── website/                   # Landing page and web presence
+└── manifest.json              # Extension configuration
 ```
 
 ## Technical Details
