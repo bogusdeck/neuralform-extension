@@ -1,43 +1,38 @@
+const DEBUG = false;
+
+function debugLog(...args) {
+    if (DEBUG) {
+        console.log(...args);
+    }
+}
+
 async function loadUserData() {
-    console.log('🚀 [POPUP] Loading user data...');
     try {
         showStatus('Loading your data...', 'info');
-        console.log('🚀 [POPUP] Calling getUserData()...');
         const userData = await getUserData();
-        
-        console.log('🚀 [POPUP] getUserData() returned:', userData);
-        
+
         if (userData) {
-            console.log('✅ [POPUP] Data loaded successfully!');
-            console.log('📋 [POPUP] User data:', userData);
+            debugLog('Popup loaded user data', userData);
             showStatus('Data loaded successfully! ✅', 'success');
         } else {
-            console.log('⚠️ [POPUP] No data found');
             showStatus('No data found. Please add your details.', 'error');
         }
     } catch (error) {
-        console.error('❌ [POPUP] Error loading user data:', error);
-        console.error('❌ [POPUP] Error details:', error.message);
+        console.error('Error loading user data:', error);
         showStatus('Error loading data. Click "Add Details" to add your info.', 'error');
     }
 }
 
 function fillCurrentPage() {
-    console.log('📝 [FILL] Starting form fill...');
     browser.tabs.query({ active: true, currentWindow: true }).then(function(tabs) {
-        console.log('📝 [FILL] Active tab:', tabs[0].url);
-        console.log('📝 [FILL] Sending fillForm message to content script...');
         browser.tabs.sendMessage(tabs[0].id, { action: 'fillForm' }).then(function(response) {
-            console.log('📝 [FILL] Response from content script:', response);
             if (response && response.success) {
-                console.log('✅ [FILL] Form filled! Fields:', response.fieldsCount);
                 showStatus('Form filled successfully! Fields filled: ' + response.fieldsCount, 'success');
             } else {
-                console.log('⚠️ [FILL] No form fields detected');
                 showStatus('No form fields detected on this page', 'error');
             }
         }).catch(function(error) {
-            console.error('❌ [FILL] Error:', error);
+            console.error('Error filling form:', error);
             showStatus('Error: ' + error.message, 'error');
         });
     });
@@ -45,7 +40,7 @@ function fillCurrentPage() {
 
 function openAddDetails() {
     browser.tabs.create({
-        url: browser.runtime.getURL('add-user-profile-firebase.html')
+        url: browser.runtime.getURL('tools/add-user-profile-firebase.html')
     }).then(function() {
         window.close();
     }).catch(function(error) {
@@ -67,7 +62,6 @@ function showStatus(message, type) {
 let currentMapping = {};
 
 async function aiFillCurrentPage() {
-    console.log('🤖 [AI-FILL] Starting AI form fill...');
     showStatus('Analyzing form with AI...', 'info');
 
     try {
@@ -80,7 +74,6 @@ async function aiFillCurrentPage() {
         const tabs = await browser.tabs.query({ active: true, currentWindow: true });
         const activeTab = tabs[0];
 
-        console.log('🤖 [AI-FILL] Requesting form context...');
         const contextResponse = await browser.tabs.sendMessage(activeTab.id, { action: 'getFormContext' });
         
         if (!contextResponse || !contextResponse.success || contextResponse.context.length === 0) {
@@ -88,7 +81,6 @@ async function aiFillCurrentPage() {
             return;
         }
 
-        console.log('🤖 [AI-FILL] Processing fields with Hybrid AI...');
         showStatus('AI is generating data...', 'info');
         
         // Categorize fields for different AI tiers
@@ -108,16 +100,12 @@ async function aiFillCurrentPage() {
 
         let finalMapping = {};
 
-        // 1. Process simple fields with local Ollama (Fast)
         if (simpleFields.length > 0) {
-            console.log('🤖 [AI-FILL] Using Local AI (Llama3) for simple fields');
             const simpleMapping = await callOllama(simpleFields, userData, 'llama3');
             finalMapping = { ...finalMapping, ...simpleMapping };
         }
 
-        // 2. Process complex fields with "Cloud" AI (Gemma/Powerful model)
         if (complexFields.length > 0) {
-            console.log('🤖 [AI-FILL] Using Cloud-tier AI (Gemma) for complex content');
             showStatus('Generating complex content with Gemma...', 'info');
             const complexMapping = await callOllama(complexFields, userData, 'gemma');
             finalMapping = { ...finalMapping, ...complexMapping };
@@ -127,7 +115,7 @@ async function aiFillCurrentPage() {
         showReviewLayer(finalMapping, contextResponse.context);
 
     } catch (error) {
-        console.error('❌ [AI-FILL] Error:', error);
+        console.error('AI fill error:', error);
         showStatus('AI error: ' + error.message, 'error');
     }
 }
@@ -135,18 +123,23 @@ async function aiFillCurrentPage() {
 function showReviewLayer(mapping, formContext) {
     const reviewLayer = document.getElementById('reviewLayer');
     const reviewFields = document.getElementById('reviewFields');
-    reviewFields.innerHTML = '';
+    reviewFields.replaceChildren();
 
     Object.keys(mapping).forEach(idOrName => {
         const fieldInfo = formContext.find(f => f.id === idOrName || f.name === idOrName);
         const labelText = fieldInfo ? (fieldInfo.label || fieldInfo.placeholder || idOrName) : idOrName;
         
         const item = document.createElement('div');
+        const label = document.createElement('label');
+        const textarea = document.createElement('textarea');
+
         item.className = 'review-item';
-        item.innerHTML = `
-            <label>${labelText}</label>
-            <textarea data-key="${idOrName}">${mapping[idOrName]}</textarea>
-        `;
+        label.textContent = labelText;
+        textarea.dataset.key = idOrName;
+        textarea.value = mapping[idOrName];
+
+        item.appendChild(label);
+        item.appendChild(textarea);
         reviewFields.appendChild(item);
     });
 
@@ -184,8 +177,6 @@ async function confirmAiFill() {
 }
 
 async function callOllama(formContext, userData, model = 'llama3') {
-    console.log(`🤖 [AI-PROXY] Requesting ${model} via background script...`);
-    
     try {
         const response = await browser.runtime.sendMessage({
             action: 'proxyOllama',
@@ -200,7 +191,7 @@ async function callOllama(formContext, userData, model = 'llama3') {
 
         return response.mapping;
     } catch (error) {
-        console.error('❌ [AI-PROXY] Proxy error:', error);
+        console.error('AI proxy error:', error);
         throw error;
     }
 }

@@ -6,3 +6,4 @@ web-ext-artifacts/
 .web-extension-id
 .env
 .env.local
+config/firebase-config.js

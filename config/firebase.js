@@ -1,4 +1,5 @@
-const firebaseConfig = {
+const extensionApi = typeof browser !== 'undefined' ? browser : chrome;
+const defaultFirebaseConfig = {
     apiKey: "",
     authDomain: "",
     projectId: "",
@@ -10,32 +11,48 @@ const firebaseConfig = {
 let firebaseApp = null;
 let db = null;
 
-// Function to load config from storage or use defaults
 async function getFirebaseConfig() {
-    const result = await browser.storage.local.get(['firebaseConfig']);
-    return result.firebaseConfig || firebaseConfig;
+    const result = await extensionApi.storage.local.get(['firebaseConfig']);
+    const runtimeConfig = globalThis.NEURALFORM_FIREBASE_CONFIG || {};
+    return {
+        ...defaultFirebaseConfig,
+        ...runtimeConfig,
+        ...(result.firebaseConfig || {})
+    };
+}
+
+function hasFirebaseConfig(config) {
+    return Boolean(
+        config &&
+        config.apiKey &&
+        config.authDomain &&
+        config.projectId &&
+        config.appId
+    );
 }
 
 async function initFirebase() {
     if (!firebaseApp && typeof firebase !== 'undefined') {
         const config = await getFirebaseConfig();
-        if (!config.apiKey) {
+        if (!hasFirebaseConfig(config)) {
             console.warn('Firebase API Key is missing. Please configure it.');
             return null;
         }
-        firebaseApp = firebase.initializeApp(config);
+        firebaseApp = firebase.apps && firebase.apps.length > 0
+            ? firebase.apps[0]
+            : firebase.initializeApp(config);
         db = firebase.firestore();
     }
     return db;
 }
 
 async function generateUserId() {
-    let result = await browser.storage.local.get('userId');
+    let result = await extensionApi.storage.local.get('userId');
     let userId = result.userId;
 
     if (!userId) {
         userId = crypto.randomUUID();
-        await browser.storage.local.set({ userId: userId });
+        await extensionApi.storage.local.set({ userId: userId });
     }
 
     return userId;
@@ -85,7 +102,7 @@ async function saveUserData(data) {
 
     try {
         await database.collection('userProfiles').doc(userId).set(userData, { merge: true });
-        await browser.storage.local.set(data);
+        await extensionApi.storage.local.set(data);
         return userData;
     } catch (error) {
         console.error('Firebase save error:', error);
@@ -96,8 +113,7 @@ async function saveUserData(data) {
 async function getUserData() {
     const database = await initFirebase();
     if (!database) {
-        // Fallback to local storage if firebase not configured
-        const localData = await browser.storage.local.get(null);
+        const localData = await extensionApi.storage.local.get(null);
         return localData || null;
     }
     
@@ -145,7 +161,7 @@ async function getUserData() {
             workExperience: data.workExperience || ''
         };
 
-        await browser.storage.local.set(formattedData);
+        await extensionApi.storage.local.set(formattedData);
 
         return formattedData;
     } catch (error) {
@@ -157,7 +173,7 @@ async function getUserData() {
 async function clearUserData() {
     const database = await initFirebase();
     if (!database) {
-        await browser.storage.local.clear();
+        await extensionApi.storage.local.clear();
         return true;
     }
     
@@ -165,7 +181,7 @@ async function clearUserData() {
 
     try {
         await database.collection('userProfiles').doc(userId).delete();
-        await browser.storage.local.clear();
+        await extensionApi.storage.local.clear();
         return true;
     } catch (error) {
         console.error('Firebase delete error:', error);

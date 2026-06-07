@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "NeuralForm",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Automatically detect and fill form fields with your saved details",
   "permissions": [
     "storage",
@@ -35,7 +35,12 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "neuralform@bogusdeck.dev"
+    }
+  },
   "content_security_policy": {
-    "extension_pages": "script-src 'self' https://www.gstatic.com; object-src 'self'"
+    "extension_pages": "script-src 'self'; object-src 'self'"
   }
 }

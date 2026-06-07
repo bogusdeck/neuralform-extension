@@ -29,7 +29,8 @@ See `docs/FIREBASE_SETUP.md` for detailed instructions.
 Quick steps:
 1. Create Firebase project: https://console.firebase.google.com/
 2. Enable Firestore Database
-3. Copy Firebase config to `config/firebase.js`
+3. Copy the Firebase values into `.env`
+4. Run `npm run sync:firebase-config`
 
 ### 2. Install Extension
 
@@ -131,9 +132,9 @@ web-extension/
 - Or use `manifest-no-icons.json` to test without icons
 
 ### Connection test fails
-- Verify anon key is correct
+- Verify your Firebase API key and project values in `.env`
 - Check internet connection
-- Ensure Supabase project is active
+- Ensure your Firebase project is active and Firestore is enabled
 
 ## Development
 

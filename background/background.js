@@ -1,31 +1,69 @@
+const extensionApi = typeof browser !== 'undefined' ? browser : chrome;
+const DEBUG = false;
 const OLLAMA_CONFIG = {
-    apiKey: "", // Add your API key in browser.storage.local.set({ ollamaApiKey: '...' })
-    apiUrl: "https://api.ollama.com" 
+    apiKey: "",
+    apiUrl: "https://api.ollama.com"
 };
+
+function debugLog(...args) {
+    if (DEBUG) {
+        console.log(...args);
+    }
+}
+
+function debugWarn(...args) {
+    if (DEBUG) {
+        console.warn(...args);
+    }
+}
 
 // Function to get config from storage
 async function getOllamaConfig() {
-    const result = await browser.storage.local.get(['ollamaApiKey', 'ollamaApiUrl']);
+    const result = await extensionApi.storage.local.get(['ollamaApiKey', 'ollamaApiUrl']);
     return {
         apiKey: result.ollamaApiKey || OLLAMA_CONFIG.apiKey,
         apiUrl: result.ollamaApiUrl || OLLAMA_CONFIG.apiUrl
     };
 }
 
-browser.runtime.onInstalled.addListener(function(details) {
+async function getStoredUserData() {
+    return extensionApi.storage.local.get(null);
+}
+
+async function mergeStoredUserData(data) {
+    await extensionApi.storage.local.set(data);
+    return getStoredUserData();
+}
+
+extensionApi.runtime.onInstalled.addListener(function(details) {
     if (details.reason === 'install') {
-        console.log('NeuralForm installed successfully!');
-        browser.storage.local.set({
+        debugLog('NeuralForm installed successfully!');
+        extensionApi.storage.local.set({
             installDate: new Date().toISOString()
         });
-        // Open onboarding page
-        browser.tabs.create({
-            url: browser.runtime.getURL('onboarding/onboarding.html')
+        extensionApi.tabs.create({
+            url: extensionApi.runtime.getURL('onboarding/onboarding.html')
         });
     } else if (details.reason === 'update') {
-        console.log('NeuralForm updated to version ' + browser.runtime.getManifest().version);
+        debugLog('NeuralForm updated to version ' + extensionApi.runtime.getManifest().version);
     }
 });
+
+function parseOllamaMapping(result, model) {
+    if (!result || typeof result.response !== 'string') {
+        throw new Error(`Ollama (${model}) returned an invalid payload.`);
+    }
+
+    try {
+        const parsed = JSON.parse(result.response);
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            throw new Error('Response was not a JSON object.');
+        }
+        return parsed;
+    } catch (error) {
+        throw new Error(`Ollama (${model}) returned malformed JSON: ${error.message}`);
+    }
+}
 
 async function callOllama(formContext, userData, model = 'llama3') {
     const config = await getOllamaConfig();
@@ -73,12 +111,11 @@ async function callOllama(formContext, userData, model = 'llama3') {
         }
 
         const result = await response.json();
-        return JSON.parse(result.response);
+        return parseOllamaMapping(result, model);
     } catch (error) {
         console.error(`Error with ${model}:`, error);
         if (!isComplex) {
-            // Fallback for simple fields to local if cloud fails
-            console.warn('Cloud Ollama failed, attempting local fallback for simple fields...');
+            debugWarn('Cloud Ollama failed, attempting local fallback for simple fields...');
             return callLocalOllama(formContext, userData, 'mistral');
         }
         throw error;
@@ -96,24 +133,26 @@ async function callLocalOllama(formContext, userData, model) {
             format: 'json'
         })
     });
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Local Ollama (${model}) failed: ${response.status} ${errorText}`);
+    }
+
     const result = await response.json();
-    return JSON.parse(result.response);
+    return parseOllamaMapping(result, model);
 }
 
-browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+extensionApi.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'checkNewData') {
-        getUserData().then(userData => {
-            // Find if this field exists in our mapping
-            const fieldKey = Object.keys(userData).find(key => key === request.field);
-            
-            // If field is missing or value is significantly different/new
+        getStoredUserData().then(userData => {
             if (!userData[request.field] || userData[request.field] === '') {
-                console.log('✨ [BACKGROUND] Found new data for:', request.field);
-                // We could show a notification or small UI element here
-                // For now, let's just save it silently to build the profile
+                debugLog('Captured new data for:', request.field);
                 const newData = { [request.field]: request.value };
-                saveUserData(newData);
+                return mergeStoredUserData(newData);
             }
+            return null;
+        }).catch(error => {
+            console.error('Error storing captured field:', error);
         });
         return true;
     }
@@ -126,7 +165,7 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
     
     if (request.action === 'getData') {
-        browser.storage.local.get(null).then(function(data) {
+        extensionApi.storage.local.get(null).then(function(data) {
             sendResponse({ success: true, data: data });
         }).catch(function(error) {
             sendResponse({ success: false, error: error.message });
@@ -135,4 +174,4 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
 });
 
-console.log('NeuralForm: Background script loaded');
+debugLog('NeuralForm: Background script loaded');

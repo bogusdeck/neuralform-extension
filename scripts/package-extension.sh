@@ -5,6 +5,8 @@
 
 echo "📦 Packaging extension as XPI..."
 
+node scripts/sync-firebase-config.js
+
 # Create a temporary directory for packaging
 TEMP_DIR="temp_package"
 rm -rf "$TEMP_DIR"

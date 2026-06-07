@@ -3,10 +3,24 @@
   "version": "2.0.0",
   "description": "Firefox extension for auto-filling forms with cloud sync",
   "scripts": {
-    "build": "web-ext build",
-    "start": "web-ext run --no-reload",
-    "dev": "web-ext run",
+    "sync:firebase-config": "node scripts/sync-firebase-config.js",
+    "build": "npm run sync:firebase-config && web-ext build",
+    "start": "npm run sync:firebase-config && web-ext run --no-reload",
+    "dev": "npm run sync:firebase-config && web-ext run",
     "lint": "web-ext lint"
+  },
+  "webExt": {
+    "ignoreFiles": [
+      "docs/**",
+      "website/**",
+      "scripts/*.sh",
+      "icons/create-icons.py",
+      "icons/generate-icons.html",
+      "tools/test-form.html",
+      ".claude/**",
+      ".env",
+      ".env.example"
+    ]
   },
   "keywords": [
     "firefox",
@@ -18,7 +32,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0"
+    "@supabase/supabase-js": "^2.39.0",
+    "firebase": "^12.14.0"
   },
   "devDependencies": {
     "web-ext": "^7.12.0"

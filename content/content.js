@@ -1,3 +1,4 @@
+const DEBUG = false;
 const fieldMapping = {
     firstName: ['firstname', 'first-name', 'first_name', 'fname', 'given-name', 'givenname'],
     lastName: ['lastname', 'last-name', 'last_name', 'lname', 'surname', 'family-name', 'familyname'],
@@ -30,6 +31,17 @@ const fieldMapping = {
     disabilityStatus: ['disability', 'disability-status', 'pwd', 'physically-challenged'],
     workExperience: ['work-experience', 'experience', 'work-history', 'employment']
 };
+
+function debugLog(...args) {
+    if (DEBUG) {
+        console.log(...args);
+    }
+}
+
+function isSensitiveInput(input) {
+    const inputType = (input.type || '').toLowerCase();
+    return inputType === 'password';
+}
 
 function matchesFieldName(inputElement, keywords) {
     const name = (inputElement.name || '').toLowerCase();
@@ -149,7 +161,7 @@ function getFormContext() {
     const formContext = [];
 
     inputs.forEach(function(input) {
-        if (input.readOnly || input.disabled || input.type === 'hidden' || input.type === 'submit' || input.type === 'button') {
+        if (input.readOnly || input.disabled || input.type === 'hidden' || input.type === 'submit' || input.type === 'button' || isSensitiveInput(input)) {
             return;
         }
 
@@ -204,19 +216,25 @@ let manualEntries = {};
 function startSmartCapture() {
     const inputs = document.querySelectorAll('input, select, textarea');
     inputs.forEach(input => {
+        if (isSensitiveInput(input)) {
+            return;
+        }
+
         input.addEventListener('change', (e) => {
             const idOrName = input.id || input.name;
-            if (!idOrName) return;
+            const value = e.target.value;
 
-            // Check if we already filled this or if it's a new manual entry
-            manualEntries[idOrName] = e.target.value;
-            console.log('🔍 [SMART-CAPTURE] Detected manual entry:', idOrName, e.target.value);
-            
-            // Send to background to check if it's new data
+            if (!idOrName || !value) {
+                return;
+            }
+
+            manualEntries[idOrName] = value;
+            debugLog('Smart Capture detected manual entry', idOrName);
+
             browser.runtime.sendMessage({
                 action: 'checkNewData',
                 field: idOrName,
-                value: e.target.value
+                value: value
             });
         });
     });
@@ -249,4 +267,4 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
 });
 
-console.log('NeuralForm: Content script loaded');
+debugLog('NeuralForm: Content script loaded');

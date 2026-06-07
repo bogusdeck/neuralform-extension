@@ -39,6 +39,7 @@
             margin-bottom: 20px;
         }
         .cv-dropzone:hover { border-color: #667eea; background: #f7fafc; }
+        .completion-actions { display: flex; gap: 12px; margin-top: 24px; }
     </style>
 </head>
 <body>
@@ -50,20 +51,20 @@
             <h1>Welcome to NeuralForm!</h1>
             <p>Let's get your profile set up to make form filling a breeze.</p>
             <div style="margin-top: 30px;">
-                <button onclick="nextStep(2)" class="btn btn-primary">Get Started</button>
+                <button id="getStartedBtn" class="btn btn-primary">Get Started</button>
             </div>
         </div>
 
         <!-- Step 2: CV Upload -->
         <div id="step2" class="step">
             <h1>Upload your CV</h1>
-            <p>We'll use AI to parse your details automatically.</p>
+            <p>CV import is not available in this packaged build yet. You can upload a file now and continue with manual entry.</p>
             <div class="cv-dropzone" id="dropzone">
-                <p>Drag & Drop your CV (PDF/Doc) or click to upload</p>
+                <p>Select your CV (PDF/DOC/DOCX/TXT)</p>
                 <input type="file" id="cvFile" style="display: none;">
             </div>
             <div id="parseStatus" style="margin-bottom: 15px; font-size: 14px;"></div>
-            <button onclick="nextStep(3)" class="btn btn-primary">Skip / Enter Manually</button>
+            <button id="skipManualBtn" class="btn btn-primary">Continue Manually</button>
         </div>
 
         <!-- Step 3: Verify & Save -->
@@ -75,72 +76,21 @@
             </div>
             <button id="saveProfileBtn" class="btn btn-success">Finish & Save</button>
         </div>
+
+        <div id="step4" class="step">
+            <h1>Profile Saved</h1>
+            <p>Your NeuralForm profile is ready. You can close this tab or open the profile editor to review everything.</p>
+            <div class="completion-actions">
+                <button id="openProfileBtn" class="btn btn-primary">Open Profile</button>
+                <button id="closeOnboardingBtn" class="btn btn-success">Close Tab</button>
+            </div>
+        </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="../node_modules/firebase/firebase-app-compat.js"></script>
+    <script src="../node_modules/firebase/firebase-firestore-compat.js"></script>
+    <script src="../config/firebase-config.js"></script>
     <script src="../config/firebase.js"></script>
-    <script>
-        let currentStep = 1;
-        function nextStep(step) {
-            document.getElementById(`step${currentStep}`).classList.remove('active');
-            document.getElementById(`step${step}`).classList.add('active');
-            currentStep = step;
-            document.getElementById('progressFill').style.width = (step * 33) + '%';
-        }
-
-        // CV Dropzone Logic
-        const dropzone = document.getElementById('dropzone');
-        dropzone.onclick = () => document.getElementById('cvFile').click();
-        
-        document.getElementById('cvFile').onchange = async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            document.getElementById('parseStatus').innerHTML = '⏳ Parsing your CV with AI...';
-            
-            // Mock parsing with AI
-            setTimeout(() => {
-                document.getElementById('parseStatus').innerHTML = '✅ CV Parsed successfully!';
-                // In real implementation, send file to backend/AI
-                nextStep(3);
-                injectFields({
-                    firstName: "John",
-                    lastName: "Doe",
-                    email: "john@example.com",
-                    degree: "Bachelor of Technology"
-                });
-            }, 2000);
-        };
-
-        function injectFields(data) {
-            const container = document.getElementById('onboardingForm');
-            container.innerHTML = '';
-            const fields = ['firstName', 'lastName', 'email', 'phone', 'degree', 'institution'];
-            fields.forEach(f => {
-                container.innerHTML += `
-                    <div class="form-group">
-                        <label>${f}</label>
-                        <input type="text" id="ob_${f}" value="${data[f] || ''}">
-                    </div>
-                `;
-            });
-        }
-
-        document.getElementById('saveProfileBtn').onclick = async () => {
-            const data = {};
-            document.querySelectorAll('#onboardingForm input').forEach(input => {
-                data[input.id.replace('ob_', '')] = input.value;
-            });
-            
-            try {
-                await saveUserData(data);
-                browser.storage.local.set({ onboardingComplete: true });
-                window.location.href = '../tools/test-form.html'; // Redirect to test
-            } catch (e) {
-                alert('Error saving data: ' + e.message);
-            }
-        };
-    </script>
+    <script src="onboarding.js"></script>
 </body>
 </html>
